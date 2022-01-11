@@ -25,8 +25,8 @@ class Trainer(object):
 
         # 模型初始化
         self.config = BertConfig.from_pretrained(args.pretrained_model_path)
-        self.model = GlobalPointer.from_pretrained(args.teacher_model_path, config=self.config, args=args,
-                                                   num_labels=self.num_labels, head_size=args.head_size, RoPE=args.RoPE)
+        self.model = GlobalPointer.from_pretrained(args.pretrained_model_path, config=self.config, args=args,
+                                                   num_labels=self.num_labels, RoPE=args.RoPE)
 
         # 设置GPU or CPU
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -106,8 +106,7 @@ class Trainer(object):
 
                         loss = tr_loss / (step + 1)
                         result = {}
-                        if self.args.pred_distill:
-                            result = self.evaluate(self.model)
+                        result = self.evaluate(self.model)
                         result['global_step'] = global_steps
                         result['loss'] = loss
 

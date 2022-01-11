@@ -17,11 +17,14 @@
 #### data_loader
 
 data_loader部分重写为可以读取通常的实体识别标注文本，转为相应的训练格式。
+并且在训练时按照每个batch中最长的文本对这个batch进行padding.
 
 #### 项目运行
 
+运行前先下载中文Bert预训练模型，放在文件夹pytorch_bert_path中
+
 ```python
-python main.py --data_path --do_train
+python main.py --data_path ./data --do_train
 ```
 
 ...........还未复现完毕，抽时间再写

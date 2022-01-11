@@ -37,3 +37,30 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
+    parser.add_argument("--data_path", type=str, default="./data/", help="The path of data.")
+    parser.add_argument("--pretrained_model_path", type=str, default="./pytorch_bert_path", help="The path of pretrained bert model.")
+    parser.add_argument("--head_size", type=int, default=64, help="The dimension of each head size.")
+    parser.add_argument("--RoPE", action="store_true", help="Whether to enable location encoding.")
+
+    parser.add_argument("--train_batch_size", type=int, default=32, help="The size of train for every batch.")
+    parser.add_argument("--eval_batch_size", default=64, type=int, help="Batch size for evaluation.")
+    parser.add_argument("--max_steps", default=-1, type=int,
+                        help="If > 0: set total number of training steps to perform. Override num_train_epochs.")
+    parser.add_argument("--num_train_epochs", default=50.0, type=float,
+                        help="Total number of training epochs to perform.")
+    parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
+    parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
+                        help="Number of updates steps to accumulate before performing a backward/update pass.")
+    parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
+    parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
+    parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
+    parser.add_argument("--dropout_rate", default=0.1, type=float, help="Dropout for fully-connected layers")
+
+    parser.add_argument('--logging_steps', type=int, default=200, help="Log every X updates steps.")
+    parser.add_argument('--save_steps', type=int, default=200, help="Save checkpoint every X updates steps.")
+    parser.add_argument("--dropout_prob", type=float, default=0.2, help="")
+    parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
+    parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
+    parser.add_argument("--seed", type=int, default=1234, help="The value of set model seed.")
+    parser.add_argument("--save_path", type=str, default="./save_path", help="The path of save model.")

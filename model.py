@@ -13,7 +13,7 @@ from .utils import loss_fun
 from transformers import BertModel, BertPreTrainedModel
 
 class GlobalPointer(BertPreTrainedModel):
-    def __init__(self, config, args, num_labels, head_size, RoPE=True):
+    def __init__(self, config, args, num_labels, RoPE=True):
         """
         :param args: 配置参数，如dropout_rate等
         :param config: Bert默认的参数
@@ -24,10 +24,12 @@ class GlobalPointer(BertPreTrainedModel):
         super(GlobalPointer, self).__init__(config)
         self.args = args
         self.num_labels = num_labels
-        self.head_size = head_size
+        self.head_size = args.head_size
         self.hidden_size = config.hidden_size
 
         self.encoder = BertModel(config=config)
+        # 在linear中乘以2的目的和multi-heads-attention的思想一样，便于后续切分为qw,kw,
+        # 当然，在multi-heads-attention中是乘以3，因为要切分为query,key,value三个
         self.linear = nn.Linear(self.hidden_size, self.num_labels * self.head_size * 2)
 
         self.RoPE = RoPE
