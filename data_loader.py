@@ -7,14 +7,13 @@
 数据转换及加载
 """
 import os
-import copy
-import json
 import torch
 import logging
 import argparse
 import numpy as np
-from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import DataLoader, Dataset
+
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +134,7 @@ class EntityProcess(object):
         return all_examples
 
 
-class EntityDataset(object):
+class EntityDataset(Dataset):
     def __init__(self, examples, tag2id):
         self.tag2id = tag2id
         self.examples = examples
