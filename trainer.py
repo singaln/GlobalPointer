@@ -176,13 +176,13 @@ class Trainer(object):
         return results
 
     def save_model(self):
-        # Save model checkpoint (Overwrite)
+        # Save models checkpoint (Overwrite)
         save_path = os.path.join(self.args.save_path, "finetune_bert_model")
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         model_to_save = self.model.module if hasattr(self.model, 'module') else self.model
         model_to_save.save_pretrained(save_path)
 
-        # Save training arguments together with the trained model
+        # Save training arguments together with the trained models
         torch.save(self.args, os.path.join(save_path, 'training_args.bin'))
-        logger.info("Saving model checkpoint to %s", save_path)
+        logger.info("Saving models checkpoint to %s", save_path)

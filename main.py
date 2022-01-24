@@ -39,7 +39,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--data_path", type=str, default="./data/", help="The path of data.")
-    parser.add_argument("--pretrained_model_path", type=str, default="./pytorch_bert_path", help="The path of pretrained bert model.")
+    parser.add_argument("--pretrained_model_path", type=str, default="./pytorch_bert_path", help="The path of pretrained bert models.")
     parser.add_argument("--head_size", type=int, default=64, help="The dimension of each head size.")
     parser.add_argument("--RoPE", action="store_true", help="Whether to enable location encoding.")
 
@@ -62,5 +62,5 @@ if __name__ == "__main__":
     parser.add_argument("--dropout_prob", type=float, default=0.2, help="")
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
-    parser.add_argument("--seed", type=int, default=1234, help="The value of set model seed.")
-    parser.add_argument("--save_path", type=str, default="./save_path", help="The path of save model.")
+    parser.add_argument("--seed", type=int, default=1234, help="The value of set models seed.")
+    parser.add_argument("--save_path", type=str, default="./save_path", help="The path of save models.")
