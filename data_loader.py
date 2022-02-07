@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# @Author: SinGaln
-# @time: 2022/1/10 10:19
+# @Time    : 2022/2/7 9:12
+# @Author  : SinGaln
 
 """
-数据转换及加载
+数据加载模块：Flat和Nested实体识别数据处理,主要将数据从BIO标记形式转换为idx标记的形式，将数据标签转换为矩阵的形式。
 """
 import os
 import torch
@@ -142,8 +142,34 @@ class EntityDataset(Dataset):
     def __len__(self):
         return len(self.examples)
 
+    def sequence_padding(self, inputs, length=None, value=0, seq_dims=1, mode='post'):
+        """Numpy函数，将序列padding到同一长度
+        """
+        if length is None:
+            length = np.max([np.shape(x)[:seq_dims] for x in inputs], axis=0)
+        elif not hasattr(length, '__getitem__'):
+            length = [length]
+
+        slices = [np.s_[:length[i]] for i in range(seq_dims)]
+        slices = tuple(slices) if len(slices) > 1 else slices[0]
+        pad_width = [(0, 0) for _ in np.shape(inputs[0])]
+
+        outputs = []
+        for x in inputs:
+            x = x[slices]
+            for i in range(seq_dims):
+                if mode == 'post':
+                    pad_width[i] = (0, length[i] - np.shape(x)[i])
+                elif mode == 'pre':
+                    pad_width[i] = (length[i] - np.shape(x)[i], 0)
+                else:
+                    raise ValueError('"mode" argument must be "post" or "pre".')
+            x = np.pad(x, pad_width, 'constant', constant_values=value)
+            outputs.append(x)
+
+        return np.array(outputs)
+
     def collect_fn(self, data):
-        dataset = []
         if len(data[0]) > 1:
             data.sort(key=lambda x: len(x[0]), reverse=True)
             data_length = [len(sequence[0]) for sequence in data]
@@ -160,20 +186,21 @@ class EntityDataset(Dataset):
             start_mapping = {j[0]: i for i, j in enumerate(span_mapping) if j != (0, 0)}
             end_mapping = {j[-1] - 1: i for i, j in enumerate(span_mapping) if j != (0, 0)}
             labels = np.zeros((len(self.tag2id), max_length, max_length))
+            batch_labels = []
             for item in data:
                 for start, end, label in item[1:]:
                     if start in start_mapping and end in end_mapping:
                         start = start_mapping[start]
                         end = end_mapping[end]
                         labels[label, start, end] = 1
+                batch_labels.append(labels[:, :len(item[0]), :len(item[0])])
             input_ids = pad_sequence([torch.from_numpy(np.array(line)) for line in lines], batch_first=True,
                                      padding_value=0)
             attention_mask = pad_sequence([torch.from_numpy(np.array(mask)) for mask in attention_mask], batch_first=True,
                                           padding_value=0)
             token_type_ids = pad_sequence([torch.from_numpy(np.array(token_type)) for token_type in token_type_ids],
                                           batch_first=True, padding_value=0)
-            labels = pad_sequence([torch.from_numpy(np.array(tags)) for tags in labels],
-                                          batch_first=True, padding_value=0)
+            labels = torch.tensor(self.sequence_padding(batch_labels, seq_dims=3)).long()
             return input_ids, attention_mask, token_type_ids, labels
 
     def __getitem__(self, item):
@@ -183,11 +210,11 @@ class EntityDataset(Dataset):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_path", type=str, default="./data/", help="The path of data sets.")
+    parser.add_argument("--data_path", type=str, default="./datasets/car/", help="The path of data sets.")
 
     args = parser.parse_args()
     ep = EntityProcess(args=args)
-    train_path = os.path.join(args.data_path, "data.txt")
+    train_path = os.path.join(args.data_path, "train.txt")
     contents, labels = ep._read_input_file(train_path)
     word2id, tag2id = get_vocab(contents, labels)
     train_data = ep.get_example(contents, labels, word2id, tag2id)
