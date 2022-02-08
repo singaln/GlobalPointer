@@ -9,7 +9,7 @@
 """
 import torch
 import torch.nn as nn
-from .utils import loss_fun
+from utils import loss_fun
 from transformers import BertModel, BertPreTrainedModel
 
 class GlobalPointer(BertPreTrainedModel):

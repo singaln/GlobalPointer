@@ -6,9 +6,9 @@ import os
 import torch
 import logging
 import numpy as np
-from .utils import Metrics
+from utils import Metrics
 from tqdm import tqdm, trange
-from .model import GlobalPointer
+from model import GlobalPointer
 from torch.utils.data import SequentialSampler, DataLoader
 from transformers import BertConfig, get_linear_schedule_with_warmup, AdamW
 
