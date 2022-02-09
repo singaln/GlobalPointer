@@ -17,7 +17,7 @@ def main(args):
     ep = EntityProcess(args=args)
     train_path = os.path.join(args.data_path, "train.txt")
     contents, labels = ep._read_input_file(train_path)
-    tag2id, word2id = get_vocab(contents, labels)
+    word2id, tag2id = get_vocab(contents, labels)
     write(args.data_path, word2id, tag2id)
     train_data = ep.get_example(contents, labels, word2id, tag2id)
     entity_label_lst = list(tag2id.keys())
@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--logging_steps', type=int, default=200, help="Log every X updates steps.")
     parser.add_argument('--save_steps', type=int, default=200, help="Save checkpoint every X updates steps.")
+    parser.add_argument('--eval_step', type=int, default=200, help="")
     parser.add_argument("--dropout_prob", type=float, default=0.2, help="")
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")

@@ -201,7 +201,7 @@ class EntityDataset(Dataset):
             token_type_ids = pad_sequence([torch.from_numpy(np.array(token_type)) for token_type in token_type_ids],
                                           batch_first=True, padding_value=0)
             labels = torch.tensor(self.sequence_padding(batch_labels, seq_dims=3)).long()
-            return input_ids, attention_mask, token_type_ids, labels
+            return input_ids.type(torch.long), attention_mask.type(torch.long), token_type_ids.type(torch.long), labels
 
     def __getitem__(self, item):
         return self.examples[item]

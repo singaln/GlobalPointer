@@ -47,7 +47,7 @@ class GlobalPointer(BertPreTrainedModel):
 
     def forward(self, input_ids, attention_mask, token_type_ids, labels_id=None):
         # [batch_size, seq_len, hidden_states]
-        sequence_output, _ = self.encoder(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        sequence_output = self.encoder(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids).last_hidden_state
 
         batch_size = sequence_output.size()[0] # batch_size
         seq_length = sequence_output.size()[1] # sequence_length
