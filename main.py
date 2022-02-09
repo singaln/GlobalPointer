@@ -64,3 +64,5 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--seed", type=int, default=1234, help="The value of set models seed.")
     parser.add_argument("--save_path", type=str, default="./save_path", help="The path of save models.")
+    args = parser.parse_args()
+    main(args)
