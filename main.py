@@ -5,6 +5,7 @@
 import os
 import argparse
 from trainer import Trainer
+from torch.utils.data import DataLoader
 from utils import init_logger, set_seed, write
 from data_loader import EntityProcess, EntityDataset, get_vocab
 
@@ -22,6 +23,7 @@ def main(args):
     train_data = ep.get_example(contents, labels, word2id, tag2id)
     entity_label_lst = list(tag2id.keys())
     ner_train_data = EntityDataset(examples=train_data, tag2id=tag2id)
+    train_dataloader = DataLoader(ner_train_data, batch_size=args.train_batch_size, collate_fn=ner_train_data.collect_fn)
 
     # dev_data
     dev_path = os.path.join(args.data_path, "train.txt")
@@ -32,7 +34,7 @@ def main(args):
     trainer = Trainer(args=args, entity_label_lst=entity_label_lst, train_data=ner_train_data, dev_data=ner_dev_data)
 
     if args.do_train:
-        trainer.train(collect_fn=ner_train_data.collect_fn)
+        trainer.train(train_dataloader)
 
 
 if __name__ == "__main__":
@@ -52,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("--weight_decay", default=0.0, type=float, help="Weight decay if we apply some.")
     parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
                         help="Number of updates steps to accumulate before performing a backward/update pass.")
-    parser.add_argument("--adam_epsilon", default=1e-8, type=float, help="Epsilon for Adam optimizer.")
+    parser.add_argument("--adam_epsilon", default=2e-5, type=float, help="Epsilon for Adam optimizer.")
     parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
     parser.add_argument("--dropout_rate", default=0.1, type=float, help="Dropout for fully-connected layers")

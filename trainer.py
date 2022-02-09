@@ -9,8 +9,9 @@ import numpy as np
 from utils import Metrics
 from tqdm import tqdm, trange
 from model import GlobalPointer
+from utils import loss_fun
 from torch.utils.data import SequentialSampler, DataLoader
-from transformers import BertConfig, get_linear_schedule_with_warmup, AdamW
+from transformers import BertConfig, AdamW
 
 logger = logging.getLogger(__name__)
 
@@ -35,83 +36,38 @@ class Trainer(object):
         else:
             self.model.to(self.device)
 
-    def train(self, collect_fn):
-        train_sampler = SequentialSampler(self.train_data)
-        train_dataloader = DataLoader(self.train_data, sampler=train_sampler, batch_size=self.args.train_batch_size,
-                                      collate_fn=collect_fn)
-
-        if self.args.max_steps > 0:
-            total = self.args.max_steps
-            self.args.num_train_epochs = self.args.max_steps // (
-                    len(train_dataloader) // self.args.gradient_accumulation_steps) + 1
-        else:
-            total = len(train_dataloader) // self.args.gradient_accumulation_steps * self.args.num_train_epochs
-
+    def train(self, train_dataloader):
         # 只进行预测
         if self.args.do_train:
             logger.info("***** Running evaluation on %s dataset *****")
             logger.info("  Num examples = %d", len(self.train_data))
             logger.info("  Batch size = %d", self.args.eval_batch_size)
-            logger.info("  Num steps = %d", total)
 
-            # 获取student模型的参数名称
-            param_optimizer = list(self.model.named_parameters())
-            size = 0
-            for n, p in self.model.named_parameters():
-                logger.info('n: {}'.format(n))
-                size += p.nelement()
-
-            logger.info('Total parameters: {}'.format(size))
             # 优化器和schedule
-            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-            optimizer_grouped_parameters = [{
-                'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
-                'weight_decay': 0.01
-            }, {
-                'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
-                'weight_decay': 0.0
-            }]
-            optimizer = AdamW(optimizer_grouped_parameters, lr=self.args.learning_rate, eps=self.args.adam_epsilon)
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=self.args.warmup_steps,
-                                                        num_training_steps=total)
+            optimizer = AdamW(self.model.parameters(), lr=self.args.learning_rate, eps=self.args.adam_epsilon)
             # Training and Evaluate
             tr_loss = 0.
             global_steps = 0.
-            train_iterator = trange(int(self.args.num_train_epochs), desc="Epoch")
-            for epoch in train_iterator:
-                self.model.train()
-                epoch_iterator = tqdm(train_dataloader, desc="Iteration")
-                for step, batch in enumerate(epoch_iterator):
-                    batch = tuple(t.to(self.device) for t in batch)
-                    input_ids = batch[0]
-                    attention_mask = batch[1]
-                    token_type_ids = batch[2]
-                    entity_labels_id = batch[3]
-                    logits, loss = self.model(input_ids=input_ids, attention_mask=attention_mask,
-                                              token_type_ids=token_type_ids,
-                                              labels_id=entity_labels_id)
-                    print("loss", loss.item())
-                    tr_loss += loss.item()
+            self.model.train()
+            epoch_iterator = tqdm(train_dataloader, desc="Iteration")
+            for step, batch in enumerate(epoch_iterator):
+                batch = tuple(t.to(self.device) for t in batch)
+                input_ids = batch[0]
+                attention_mask = batch[1]
+                token_type_ids = batch[2]
+                entity_labels_id = batch[3]
+                logits = self.model(input_ids=input_ids, attention_mask=attention_mask,
+                                          token_type_ids=token_type_ids,
+                                          labels_id=entity_labels_id)
+                loss = loss_fun(logits, entity_labels_id)
+                tr_loss += loss.item()
 
-                    loss.backward()
-                    optimizer.step()
-                    optimizer.zero_grad()
-                    scheduler.step()
-                    if (global_steps + 1) % self.args.eval_step == 0:
-                        logger.info("***** Running evaluation *****")
-                        logger.info("  Epoch = {} iter {} step".format(epoch, global_steps))
-                        logger.info("  Num examples = %d", len(self.dev_data))
-                        logger.info("  Batch size = %d", self.args.eval_batch_size)
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+                # scheduler.step()
 
-                        self.model.eval()
-
-                        loss = tr_loss / (step + 1)
-                        result = {}
-                        result = self.evaluate(self.model)
-                        result['global_step'] = global_steps
-                        result['loss'] = loss
-
-                self.save_model()
+            self.save_model()
 
     def evaluate(self, model):
         dataset = self.dev_data

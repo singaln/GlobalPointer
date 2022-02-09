@@ -9,7 +9,6 @@
 """
 import torch
 import torch.nn as nn
-from utils import loss_fun
 from transformers import BertModel, BertPreTrainedModel
 
 class GlobalPointer(BertPreTrainedModel):
@@ -86,9 +85,9 @@ class GlobalPointer(BertPreTrainedModel):
         # 排除下三角
         mask = torch.tril(torch.ones_like(logits), -1)
         logits = logits - mask * 1e12
-        output = (logits,)
+        # output = (logits,)
         # 计算loss
-        if labels_id is not None:
-            loss = loss_fun(labels_id, logits)
-            output += (loss,)
-        return output  # (logits, loss)
+        # if labels_id is not None:
+        #     loss = loss_fun(labels_id, logits)
+        #     output += (loss,)
+        return logits/self.head_size**0.5  # (logits, loss)
