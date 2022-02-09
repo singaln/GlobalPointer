@@ -218,7 +218,7 @@ class EntityDataset(Dataset):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_path", type=str, default="./datasets/car/", help="The path of data sets.")
+    parser.add_argument("--data_path", type=str, default="./data/", help="The path of data sets.")
 
     args = parser.parse_args()
     ep = EntityProcess(args=args)
