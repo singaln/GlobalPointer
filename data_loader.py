@@ -181,8 +181,10 @@ class EntityDataset(Dataset):
                 token_type_ids.append([0] * i)
             lines = [i[0] for i in data]
             span_mapping = []
-            for i in range(max_length - 1):
+            span_mapping.append((0, 0))
+            for i in range(max_length):
                 span_mapping.append((i, i + 1))
+            span_mapping.append((0, 0))
             start_mapping = {j[0]: i for i, j in enumerate(span_mapping) if j != (0, 0)}
             end_mapping = {j[-1] - 1: i for i, j in enumerate(span_mapping) if j != (0, 0)}
             labels = np.zeros((len(self.tag2id), max_length, max_length))

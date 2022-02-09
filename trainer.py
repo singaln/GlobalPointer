@@ -90,6 +90,7 @@ class Trainer(object):
                     logits, loss = self.model(input_ids=input_ids, attention_mask=attention_mask,
                                               token_type_ids=token_type_ids,
                                               labels_id=entity_labels_id)
+                    print("loss", loss.item())
                     tr_loss += loss.item()
 
                     loss.backward()
