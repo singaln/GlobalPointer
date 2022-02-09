@@ -82,15 +82,6 @@ def init_logger():
                         level=logging.INFO)
 
 
-# 设置种子seed
-def set_seed(args):
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(args.seed)
-
-
 def write(data_path, word2id, tag2id):
     with open(data_path + "/word2id.json", "w", encoding="utf-8") as f1, open(data_path + "/tag2id.json", "w",
                                                                               encoding="utf-8") as f2:
