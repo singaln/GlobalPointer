@@ -115,13 +115,15 @@ class EntityProcess(object):
             each_key.append(list(dic.keys())[list(idx_dic.keys())[-1]:])
         for each in each_key:
             lst = ()
-            lst += (each[0], each[-1] + 1,)
+            lst += (each[0] + 1, each[-1] + 2,)
             idx1 = []
             for e in each:
                 idx1.append(tag2id[dic[e][1].split("-")[1]])
             idx2 = list(set(idx1))[0]
             lst += (idx2,)
             label_lst.append(lst)
+
+        # print("label_lst", texts, label_lst)
         return label_lst
 
     def get_example(self, contents, labels, word2id, tag2id):
@@ -180,13 +182,17 @@ class EntityDataset(Dataset):
                 attention_mask.append([1] * i)
                 token_type_ids.append([0] * i)
             lines = [i[0] for i in data]
+            # print(lines)
             span_mapping = []
             span_mapping.append((0, 0))
             for i in range(max_length):
                 span_mapping.append((i, i + 1))
             span_mapping.append((0, 0))
+            # print("span_mapping", span_mapping)
             start_mapping = {j[0]: i for i, j in enumerate(span_mapping) if j != (0, 0)}
             end_mapping = {j[-1] - 1: i for i, j in enumerate(span_mapping) if j != (0, 0)}
+            # print("start_mapping",start_mapping)
+            # print("end_mapping", end_mapping)
             labels = np.zeros((len(self.tag2id), max_length, max_length))
             batch_labels = []
             for item in data:
