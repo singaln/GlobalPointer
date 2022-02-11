@@ -93,6 +93,8 @@ class EntityProcess(object):
             text_lst.append(word2id[word] if word in word2id else word2id["[UNK]"])
         text_lst.insert(0, word2id["[CLS]"])
         text_lst.append(word2id["[SEP]"])
+        if len(text_lst) > 510:
+            text_lst = text_lst[:510]
         label_lst.append(text_lst)
         for idx, (t, l) in enumerate(zip(texts, labels)):
             dic[idx] = (t, l)
