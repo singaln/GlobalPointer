@@ -6,13 +6,13 @@ import os
 import argparse
 from trainer import Trainer
 from torch.utils.data import DataLoader
-from utils import init_logger, set_seed, write
+from utils import init_logger, write
 from data_loader import EntityProcess, EntityDataset, get_vocab
 
 
 def main(args):
     init_logger()
-    set_seed(args)
+    # set_seed(args)
 
     # train_data
     ep = EntityProcess(args=args)
