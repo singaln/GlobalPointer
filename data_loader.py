@@ -94,7 +94,7 @@ class EntityProcess(object):
         text_lst.insert(0, word2id["[CLS]"])
         text_lst.append(word2id["[SEP]"])
         if len(text_lst) > 510:
-            text_lst = text_lst[:510]
+            print(texts)
         label_lst.append(text_lst)
         for idx, (t, l) in enumerate(zip(texts, labels)):
             dic[idx] = (t, l)
@@ -231,5 +231,3 @@ if __name__ == "__main__":
     entity_label_lst = list(tag2id.keys())
     ner_train_data = EntityDataset(examples=train_data, tag2id=tag2id)
     data_loader = DataLoader(ner_train_data, batch_size=32, collate_fn=ner_train_data.collect_fn)
-    for data in data_loader:
-        print(data)
